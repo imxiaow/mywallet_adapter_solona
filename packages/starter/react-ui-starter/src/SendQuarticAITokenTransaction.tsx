@@ -59,8 +59,6 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
     var quarticAITokenPubKey = new PublicKey("9tjgbaSSEyPgRgTLVaTzzZR46xPq1jU6d7fB217czRdK");
 
     const onClick = useCallback(async () => {
-        console.log(userCurWalletSecurityKey)
-
         if (!publicKey) {
             notify('error', 'Wallet not connected!');
             return;
@@ -70,20 +68,14 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
             notify('error', 'Destination Wallet not entered!');
             return;
         }
-
         
         if(userCurWalletSecurityKey.length === 0){
             notify('error', 'Security Key not provide!');
             return;
         }
 
-        console.log(userCurWalletSecurityKey)
-
-
-
         const DEMO_WALLET_SECRET_KEY = new Uint8Array(userCurWalletSecurityKey);
 
-        console.log(DEMO_WALLET_SECRET_KEY)
         var fromWallet = Keypair.fromSecretKey(DEMO_WALLET_SECRET_KEY);
         var toWalletPubKey = new PublicKey(ToWalletAddress)
 
