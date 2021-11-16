@@ -1,0 +1,1 @@
+# mywallet_adapter_solona
