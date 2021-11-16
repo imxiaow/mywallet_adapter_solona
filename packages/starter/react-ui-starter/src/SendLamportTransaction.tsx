@@ -9,8 +9,8 @@ import { Wallet } from '@solana/wallet-adapter-wallets';
 const stylesTransactionButton = {
     container: {
         marginLeft: '25vw',
-        height: '6vh'
-        
+        height: '6vh',
+        marginBottom: '5vh'
     },
     containerInput: {
         marginBottom: '2vh',

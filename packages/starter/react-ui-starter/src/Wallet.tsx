@@ -17,6 +17,7 @@ import { Navigation } from './Navigation';
 import { Notification } from './Notification';
 
 import { SendLamportTransaction } from './SendLamportTransaction'
+import { SendQuarticAITokenTransaction } from './SendQuarticAITokenTransaction';
 
 export const Wallet: FC = () => {
     const network = WalletAdapterNetwork.Devnet;
@@ -57,7 +58,7 @@ export const Wallet: FC = () => {
                     <Navigation />
                     <br/>
                     <SendLamportTransaction myWallet={wallets}/>
-
+                    <SendQuarticAITokenTransaction myWallet={wallets}/>
                 </WalletModalProvider>
                 <Toaster position="bottom-left" reverseOrder={false} />
             </WalletProvider>
