@@ -97,16 +97,47 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
             )
 
             // Add token transfer instructions to transaction
+            // var transaction = new Transaction().add(
+            //         Token.createTransferInstruction(
+            //             TOKEN_PROGRAM_ID,
+            //             fromTokenAccount.address,
+            //             toTokenAccount.address,
+            //             fromWallet.publicKey,
+            //             [],
+            //             AITokenAmount
+            //         )
+            // );
+            // programId: PublicKey,
+            // source: PublicKey,
+            // destination: PublicKey,
+            // owner: PublicKey,
+            // multiSigners: Array<Signer>,
+            // amount: number | u64,
+
+
             var transaction = new Transaction().add(
-                    Token.createTransferInstruction(
-                        TOKEN_PROGRAM_ID,
-                        fromTokenAccount.address,
-                        toTokenAccount.address,
-                        fromWallet.publicKey,
-                        [],
-                        AITokenAmount
-                    )
-            );
+                Token.createTransferCheckedInstruction(
+                    TOKEN_PROGRAM_ID,
+                    fromTokenAccount.address,
+                    quarticAITokenPubKey,
+                    toTokenAccount.address,
+                    fromWallet.publicKey,
+                    [],
+                    AITokenAmount,
+                    9,
+                )
+        );
+
+        // programId: PublicKey,
+        // source: PublicKey,
+        // mint: PublicKey,
+        // destination: PublicKey,
+        // owner: PublicKey,
+        // multiSigners: Array<Signer>,
+        // amount: number | u64,
+        // decimals: number,
+
+
             // Sign transaction, broadcast, and confirm
             signature = await sendAndConfirmTransaction(
                 connection,
@@ -116,7 +147,15 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
             notify('info', 'Transaction sent:', signature);
 
             await connection.confirmTransaction(signature, 'processed');
-            notify('success', 'Transaction successful!', signature);
+            notify('success', 'Transaction successfully processed!', signature);
+
+            await connection.confirmTransaction(signature, 'confirmed');
+            notify('success', 'Transaction successfully confirmed!', signature);
+
+            await connection.confirmTransaction(signature, 'finalized');
+            notify('success', 'Transaction successfully finalized!', signature);
+
+
         } catch (error: any) {
             notify('error', `Transaction failed! ${error?.message}`, signature);
             return;
