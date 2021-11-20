@@ -1,11 +1,9 @@
 import { Button, TextField } from '@material-ui/core';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { Keypair, Transaction, TransactionSignature, PublicKey, sendAndConfirmTransaction} from '@solana/web3.js';
+import { Keypair, Transaction, TransactionSignature, PublicKey, sendAndConfirmTransaction, Signer } from '@solana/web3.js';
 import { FC, useCallback, useState, ChangeEvent } from 'react';
 import { useNotify } from './notify';
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Wallet } from '@solana/wallet-adapter-wallets';
-
 
 const stylesTransactionButton = {
     container: {
@@ -27,19 +25,18 @@ const stylesTransactionButton = {
     }
 };
 
-export interface SendQuarticAITokenTransactionProps {
-    myWallet: Wallet[];
-}
+// export interface SendQuarticAITokenTransactionProps {
+//     myWallet: Wallet[];
+// }
 
-export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProps> = ({
-    myWallet,
-}) => {
+export const SendQuarticAITokenTransaction =()=> {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
 
-    const [AITokenAmount, setAITokenAmount] = useState(100000000); // default is 100000000
+
+    const [AITokenAmount, setAITokenAmount] = useState(1); // default is 1000000000, 1QAI
     const [ToWalletAddress, setToWalletAddress] =useState('');
-    const [userCurWalletSecurityKey, setUserCurWalletSecurityKey] = useState([])
+    // const [userCurWalletSecurityKey, setUserCurWalletSecurityKey] = useState([])
 
     const notify = useNotify();
 
@@ -51,10 +48,10 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
         setToWalletAddress(event.currentTarget.value)
     }
 
-    const onChangeSecurityKey= (event: ChangeEvent<HTMLInputElement>) => {
-        var myArray = JSON.parse("[" + event.currentTarget.value + "]")
-        setUserCurWalletSecurityKey(myArray)
-    }
+    // const onChangeSecurityKey= (event: ChangeEvent<HTMLInputElement>) => {
+    //     var myArray = JSON.parse("[" + event.currentTarget.value + "]")
+    //     setUserCurWalletSecurityKey(myArray)
+    // }
 
     var quarticAITokenPubKey = new PublicKey("9tjgbaSSEyPgRgTLVaTzzZR46xPq1jU6d7fB217czRdK");
 
@@ -69,15 +66,17 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
             return;
         }
         
-        if(userCurWalletSecurityKey.length === 0){
-            notify('error', 'Security Key not provide!');
-            return;
-        }
+        // if(userCurWalletSecurityKey.length === 0){
+        //     notify('error', 'Security Key not provide!');
+        //     return;
+        // }
 
-        const DEMO_WALLET_SECRET_KEY = new Uint8Array(userCurWalletSecurityKey);
+        // const DEMO_WALLET_SECRET_KEY = new Uint8Array(userCurWalletSecurityKey);
 
-        var fromWallet = Keypair.fromSecretKey(DEMO_WALLET_SECRET_KEY);
+        // var fromWallet = Keypair.fromSecretKey(DEMO_WALLET_SECRET_KEY);
         var toWalletPubKey = new PublicKey(ToWalletAddress)
+
+        var feePayerAccount = Keypair.generate()
 
         let signature: TransactionSignature = '';
 
@@ -86,7 +85,8 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
                 connection, 
                 quarticAITokenPubKey,
                 TOKEN_PROGRAM_ID,
-                fromWallet,
+                // fromWallet,
+                feePayerAccount,
             )
 
             var fromTokenAccount = await QuarticToken.getOrCreateAssociatedAccountInfo(
@@ -96,34 +96,15 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
                 toWalletPubKey
             )
 
-            // Add token transfer instructions to transaction
-            // var transaction = new Transaction().add(
-            //         Token.createTransferInstruction(
-            //             TOKEN_PROGRAM_ID,
-            //             fromTokenAccount.address,
-            //             toTokenAccount.address,
-            //             fromWallet.publicKey,
-            //             [],
-            //             AITokenAmount
-            //         )
-            // );
-            // programId: PublicKey,
-            // source: PublicKey,
-            // destination: PublicKey,
-            // owner: PublicKey,
-            // multiSigners: Array<Signer>,
-            // amount: number | u64,
-
-
             var transaction = new Transaction().add(
                 Token.createTransferCheckedInstruction(
                     TOKEN_PROGRAM_ID,
                     fromTokenAccount.address,
                     quarticAITokenPubKey,
                     toTokenAccount.address,
-                    fromWallet.publicKey,
+                    publicKey,
                     [],
-                    AITokenAmount,
+                    AITokenAmount*1000000000,
                     9,
                 )
         );
@@ -137,13 +118,14 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
         // amount: number | u64,
         // decimals: number,
 
-
             // Sign transaction, broadcast, and confirm
-            signature = await sendAndConfirmTransaction(
-                connection,
-                transaction,
-                [fromWallet]
-            );
+            // signature = await sendAndConfirmTransaction(
+            //     connection,
+            //     transaction,
+            //     [fromWallet]
+            // );
+
+            signature = await sendTransaction(transaction, connection);
             notify('info', 'Transaction sent:', signature);
 
             await connection.confirmTransaction(signature, 'processed');
@@ -171,7 +153,7 @@ export const SendQuarticAITokenTransaction: FC<SendQuarticAITokenTransactionProp
             <br/>
             <TextField style={stylesTransactionButton.containerInputLonger} color="primary" id="outlined-basic" label="Wallet Address" onChange={onChangeWalletAddress}  variant="outlined" />
             <br/>
-            <TextField style={stylesTransactionButton.containerInputLonger} color="primary" id="outlined-basic" label="Security Key" onChange={onChangeSecurityKey}  variant="outlined" />
+            {/* <TextField style={stylesTransactionButton.containerInputLonger} color="primary" id="outlined-basic" label="Security Key" onChange={onChangeSecurityKey}  variant="outlined" /> */}
             <br/>
             <Button style={stylesTransactionButton.container} variant="contained" color="primary" onClick={onClick} disabled={!publicKey}>
                 Send Quartic AI Token to Wallet Address (devnet)
